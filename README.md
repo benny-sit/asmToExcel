@@ -33,12 +33,12 @@ EXAMPLE:
 
 1. unzip the folder 
 
-![My Remote Image](https://www.dropbox.com/s/9kd6h602gmhlke9/first.png?dl=0)
+![Screenshot](img/first.png)
 
 2. put /asmToExcel.exe from (GitHub) dist/asmToExcel.exe in the folder or run in cmd asmToExcel if you put it in PATH as a variable
 
-![My Remote Image](https://www.dropbox.com/s/kuxty2t29lpnmar/Second.png?dl=0)
+![Screenshot](img/second.png)
 
 3. You will get asmToExcel.xlsx file and it will organize the folders
 
-![My Remote Image](https://www.dropbox.com/s/cn70sjvn5hn77pt/Third.png?dl=0)
+![Screenshot](img/third.png)
