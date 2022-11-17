@@ -17,7 +17,6 @@ Each row is student .asm file content.
 
 SETUP (Not neccasery):
 
-( you need python 3.6 or higher installed )
 1. download dist/asmToExcel.exe
 2. Add the location of /asmToExcel.exe to PATH ( tutorial -> https://www.youtube.com/watch?v=5BTnfpIq5mI )
 3. done.
@@ -28,6 +27,13 @@ USE:
 2. open cmd in homework folder
 3. write in cmd -> asmToExcel. execute the command
 
+TO COMPILE:
+
+pip install -r requirements.txt
+
+TO CONVERT TO .EXE (via pyinstaller):
+
+pyinstaller --collect-all patoolib -F -w asmToExcel.py
 
 EXAMPLE: 
 

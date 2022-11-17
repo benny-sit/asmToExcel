@@ -1,55 +1,81 @@
 import os
 import xlsxwriter as xw
-import zipfile
 from pathlib import Path
 import shutil
-
+import zipfile
+patool_availabe = False
+try:
+    patool_availabe = True
+    import patoolib
+except ImportError:
+    patool_availabe = False
+    print("cannot import unrar")
 
 # CONSTANTS
 EXCEL_NAME = 'asmToExcel.xlsx'
 SHEET_NAME = 'asmFiles'
 
 
-def upOneDir(path):
+def excludeFolder(d):
+    '''
+    The Folders you want to exclude from running on
+    :param d: directory path
+    :return: True / False -> filter sub folders
+    '''
+    return '__' in d or d.startswith('.') or d in ['dist', 'venv', 'img', 'build']
+
+
+def moveFilesToMain(folder_path):
+    '''
+    removing all sub folders but keeping content in main folder
+    :param folder_path: directory path
+    :return: None | just organizing the sub folders
+    '''
+    # MOVE FILES
+    # Smartest Way to skip main dir ->
+    walker = os.walk(folder_path)
+    next(walker)
+    for root, dirs, files in walker:
+
+        for file in files:
+            shutil.move(os.path.join(root, file), folder_path)
+
+    # CLEAN UP
+    [shutil.rmtree(f.path) for f in os.scandir(folder_path) if f.is_dir()]
+
+
+def unzipOrUnrarFolder(folder, file):
+    '''
+    Trying to unpack the folder
+    :param folder: directory path
+    :param file: filename -> endswith .zip/.rar (with patool is possible to use other formats)
+    :return: True if file was decompressed else False
+    '''
     try:
-        # from Python 3.6
-        parent_dir = Path(path).parents[1]
-        # for Python 3.4/3.5, use str to convert the path to string
-        # parent_dir = str(Path(path).parents[1])
-        shutil.move(path, parent_dir)
-    except IndexError:
-        # no upper directory
-        print("No upper directory / error")
-
-
-def extractUp(folder_path):
-    subfolders = [f.path for f in os.scandir(folder_path) if f.is_dir()]
-    for d in subfolders:
-        for f in os.listdir(d):
-            if os.path.isdir(os.path.join(d, f)):
-                extractUp(os.path.join(d, f))
-            else:
-                upOneDir(os.path.join(d, f))
-
-        try:
-            os.rmdir(d)
-        except:
-            print("Cannot rm dir")
-
-
-def unzipFolder(folder_path):
-    with zipfile.ZipFile(folder_path, 'r') as zip_ref:
-        zip_ref.extractall(os.path.dirname(folder_path))
+        patoolib.extract_archive(os.path.join(folder, file), outdir=folder)
+        return True
+    except:
+        if file.endswith('.zip'):
+            with zipfile.ZipFile(os.path.join(folder, file)) as zip_ref:
+                zip_ref.extractall(folder)
+            return True
+    return False
 
 
 def unZipSubfolders():
+    '''
+    Iterating through all included sub folders and decompressing + organizing
+    :return: None | changes sub directories
+    '''
     for root, dirs, files in os.walk(os.getcwd()):
+        [dirs.remove(d) for d in list(dirs) if excludeFolder(d)]
         if root == os.getcwd(): continue
-        for file in files:
-            if file.endswith('.zip'):
-                unzipFolder(os.path.join(root, file))
-                os.remove(os.path.join(root, file))
-        extractUp(root)
+        if not excludeFolder(root):
+            for file in files:
+                if file.endswith('.zip') or file.endswith('.rar'):
+                    isUnzipped = unzipOrUnrarFolder(root, file)
+                    if isUnzipped: os.remove(os.path.join(root, file))
+            moveFilesToMain(root)
 
 
 def correctIdentation(lines):
@@ -116,6 +142,7 @@ def toExcel():
     c = 0
     # Iterating Through subfolders
     for root, dirs, files in os.walk(os.getcwd()):
+        [dirs.remove(d) for d in list(dirs) if excludeFolder(d)]
         try:
             # Stop iterating if it is subfolder of subfolder
             two_up = os.path.abspath(os.path.join(root, '..', '..'))
@@ -129,7 +156,7 @@ def toExcel():
         if root == os.getcwd():
             r = 0
             for d in dirs:
-                if '__' not in d and not d.startswith('.'):
+                if '__' not in d and not d.startswith('.') and d not in ['dist', 'venv', 'img', 'build']:
                     dirName = ' '.join(d.split('_')[-2:])
                     if dirName[-1].isdigit():
                         dirName = d.split('-')[0]

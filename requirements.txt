@@ -1,1 +1,2 @@
-XlsxWriter>=3.0.3
+patool==1.12
+XlsxWriter==3.0.3
