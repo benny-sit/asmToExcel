@@ -67,6 +67,18 @@ def unZipSubfolders():
     Iterating through all included sub folders and decompressing + organizing
     :return: None | changes sub directories
     '''
+    # for zip in folder 
+    for f in os.scandir(os.getcwd()):
+        if f.is_file() and f.path.endswith(".zip"):
+            base = os.path.basename(f.path)
+            p = os.path.splitext(f.path)[0]
+            os.mkdir(p)
+            shutil.move(f.path, os.path.join(p, base))
+            unzipOrUnrarFolder(p, base)
+            os.remove( os.path.join(p, base))
+            
+    
+    # for zip in sub folders 
     for root, dirs, files in os.walk(os.getcwd()):
         [dirs.remove(d) for d in list(dirs) if excludeFolder(d)]
         if root == os.getcwd(): continue
@@ -88,9 +100,9 @@ def correctIdentation(lines):
     isBlockIndent = False
     res = []
     for line in lines[:]:
-        isFunc = any('proc' == w or 'endp' == w for w in line)
-        if line[0] == 'ret' or ':' in line[0] or isFunc:
-            if any('proc' == w for w in line) or ':' in line[0]:
+        isFunc = any('proc' == w.lower() or 'endp' == w.lower() for w in line)
+        if line[0].lower() == 'ret' or ':' in line[0] or isFunc:
+            if any('proc' == w.lower() for w in line) or ':' in line[0]:
                 isBlockIndent = True
                 res.append("\n" + ' '.join(line))
             else:
