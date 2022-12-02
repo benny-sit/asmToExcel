@@ -90,7 +90,7 @@ def unZipSubfolders():
             moveFilesToMain(root)
 
 
-def correctIdentation(lines):
+def correctIndentation(lines):
     '''
     indenting the correct lines
     @param lines: List[List[str]] every line with every word separated
@@ -110,7 +110,7 @@ def correctIdentation(lines):
                 res.append(' '.join(line))
         else:
             if isBlockIndent:
-                res.append(f'{indent}{line[0].ljust(7)}{" ".join(line[1:])}')
+                res.append(f'{indent}{line[0].ljust(6)} {" ".join(line[1:])}')
             else:
                 res.append(" ".join(line))
 
@@ -132,7 +132,7 @@ def writeFile(ws, file_name, row, col, format):
 
         # TO ADD -> checks on file
 
-        lines = correctIdentation(lines)
+        lines = correctIndentation(lines)
         ws.write(row, col, '\n'.join(lines), format)
 
 
